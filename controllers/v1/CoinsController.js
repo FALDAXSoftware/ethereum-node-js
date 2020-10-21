@@ -773,19 +773,90 @@ class UsersController extends AppController {
     async sendTest(req, res) {
         try {
             let req_body = req.body;
-            var senddetails = {
-                "address" : req_body.address,
-                "amount" : req_body.amount,
-                "coin": req_body.coin
+
+            var user_id = req.body.user_id;
+            var amount = req.body.amount;
+            var destination_address = req.body.destination_address;
+            var faldax_fee = req.body.faldax_fee;
+            var network_fee = req.body.network_fee;
+            var is_admin = (req.body.is_admin) ? (req.body.is_admin) : false;
+
+            var coinData = await CoinsModel
+                .query()
+                .first()
+                // .where('deleted_at', null)
+                .andWhere('coin_code', process.env.COIN)
+                .andWhere('is_active', true)
+                // .andWhere('type', 2)
+                .orderBy('id', 'DESC')
+
+            console.log(coinData);
+
+            if (coinData != undefined) {
+
+                var walletData = await WalletModel
+                    .query()
+                    .first()
+                    .where("deleted_at", null)
+                    .andWhere("user_id", user_id)
+                    .andWhere("coin_id", coinData.id)
+                    .andWhere("is_admin", is_admin)
+                    .orderBy('id', 'DESC');
+
+                console.log("walletData", walletData)
+
+                if (walletData != undefined) {
+
+                    var balanceChecking = parseFloat(amount) + parseFloat(faldax_fee) + parseFloat(network_fee);
+
+                    if (walletData.placed_balance >= balanceChecking) {
+
+                        var senddetails = {
+                            "address": destination_address,
+                            "amount": amount,
+                            "coin": req_body.coin
+                        }
+                        var getFee = await sendHelper.sendData(senddetails);
+
+                        if (getFee != undefined) {
+                            var gasPrice = await web3.eth.getGasPrice();
+                            var gasUsed = await getFee.gasUsed;
+                            var fees = gasPrice * gasUsed;
+                            var realNetworkFee = web3.utils.fromWei(fees.toString(), 'ether');
+                            var balanceUpdate = parseFloat(faldax_fee) + parseFloat(Math.abs(realNetworkFee))
+                        }
+                        return res
+                            .status(200)
+                            .json({
+                                "status": 200,
+                                "message": "Ethereum Fees",
+                                "data": { "fee": getFee }
+                            })
+                    } else {
+                        return res
+                            .status(201)
+                            .json({
+                                "status": 201,
+                                "message": "Insufficient Balance in the wallet"
+                            })
+                    }
+                } else {
+                    return res
+                        .status(400)
+                        .json({
+                            "status": 400,
+                            "message": "Wallet Data Not Found"
+                        })
+                }
+            } else {
+                return res
+                    .status(500)
+                    .json({
+                        "status": 500,
+                        "message": "Coin Not Found"
+                    })
             }
-            var getFee = await sendHelper.sendData(senddetails);
-            return res
-                .status(200)
-                .json({
-                    "status": 200,
-                    "message": "Ethereum Fees",
-                    "data": { "fee": getFee }
-                })
+
         } catch (error) {
             console.log(error);
         }
