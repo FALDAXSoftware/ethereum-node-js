@@ -12,8 +12,8 @@ var balanceData = async (address) => {
         var ERC20_2_balance = await contract2.methods.balanceOf(process.env.CONTRACT_ADDRESS).call();
         var allbalance = {
             "eth_balance": web3.utils.fromWei(eth_balance.toString(),'ether'),
-            "qrdx_balance": ERC20_1_balance,
-            "dox_balance": ERC20_2_balance
+            "qrdx_balance": web3.utils.fromWei(ERC20_1_balance,'ether'),
+            "dox_balance": web3.utils.fromWei(ERC20_2_balance,'ether')
         }
         console.log(allbalance);
         return allbalance;

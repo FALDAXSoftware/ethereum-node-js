@@ -775,7 +775,8 @@ class UsersController extends AppController {
             let req_body = req.body;
             var senddetails = {
                 "address" : req_body.address,
-                "amount" : req_body.amount
+                "amount" : req_body.amount,
+                "coin": req_body.coin
             }
             var getFee = await sendHelper.sendData(senddetails);
             return res
