@@ -786,6 +786,8 @@ class UsersController extends AppController {
         try {
             let req_body = req.body;
 
+            console.log("req_body", req_body)
+
             var user_id = req.body.user_id;
             var amount = req.body.amount;
             var destination_address = req.body.destination_address;
@@ -797,7 +799,7 @@ class UsersController extends AppController {
                 .query()
                 .first()
                 // .where('deleted_at', null)
-                .andWhere('coin_code', req_body.coin)
+                .andWhere('coin', req_body.coin)
                 .andWhere('is_active', true)
                 // .andWhere('type', 2)
                 .orderBy('id', 'DESC')
@@ -828,13 +830,18 @@ class UsersController extends AppController {
                             "amount": amount,
                             "coin": req_body.coin
                         }
+
+                        console.log("senddetails", senddetails)
                         var getFee = await sendHelper.sendData(senddetails);
+
+                        console.log("getFee", getFee)
 
                         if (getFee != undefined) {
                             var gasPrice = await web3.eth.getGasPrice();
                             var gasUsed = await getFee.gasUsed;
                             var fees = gasPrice * gasUsed;
                             var realNetworkFee = web3.utils.fromWei(fees.toString(), 'ether');
+                            console.log("realNetworkFee", realNetworkFee)
                             var balanceUpdate = parseFloat(faldax_fee) + parseFloat(Math.abs(realNetworkFee))
                             var balanceValueUpdateValue = parseFloat(amount) + parseFloat(balanceUpdate);
                             var balanceValueUpdate = parseFloat(walletData.balance) - parseFloat(balanceValueUpdateValue);
@@ -853,9 +860,13 @@ class UsersController extends AppController {
                                     "placed_balance": placedBlanaceValueUpdate
                                 })
 
-                            var getFiatValues = await getFiatValuHelper.getFiatValue(process.env.COIN);
+                            var getFiatValues = await getFiatValuHelper.getFiatValue(process.env.COINFIAT);
 
-                            console.log("getFiatValues", getFiatValues)
+                            console.log("getFiatValues", getFiatValues);
+
+                            console.log("getFee.logs[0].transactionHash", getFee.transactionHash)
+
+                            console.log("parseFloat(amount) + parseFloat(faldax_fee)", parseFloat(amount) + parseFloat(faldax_fee))
 
 
                             var transactionData = await WalletHistoryModel
@@ -863,12 +874,12 @@ class UsersController extends AppController {
                                 .insert({
                                     "source_address": walletData.receive_address,
                                     "destination_address": destination_address,
-                                    "amount": balanceValueUpdateValue,
-                                    "actual_amount": amount,
+                                    "amount": parseFloat(amount) + parseFloat(faldax_fee),
+                                    "actual_amount": parseFloat(amount),
                                     "transaction_type": "send",
                                     "created_at": new Date(),
                                     "coin_id": coinData.id,
-                                    "transaction_id": getFee.logs[0].transactionHash,
+                                    "transaction_id": getFee.transactionHash,
                                     "faldax_fee": faldax_fee,
                                     "actual_network_fees": realNetworkFee,
                                     "estimated_network_fees": network_fee,
@@ -882,12 +893,12 @@ class UsersController extends AppController {
                                 .insert({
                                     "source_address": walletData.receive_address,
                                     "destination_address": destination_address,
-                                    "amount": balanceValueUpdateValue,
+                                    "amount": parseFloat(amount) + parseFloat(faldax_fee),
                                     "actual_amount": amount,
                                     "transaction_type": "send",
                                     "created_at": new Date(),
                                     "coin_id": coinData.id,
-                                    "transaction_id": getFee.logs[0].transactionHash,
+                                    "transaction_id": getFee.transactionHash,
                                     "faldax_fee": faldax_fee,
                                     "actual_network_fees": realNetworkFee,
                                     "estimated_network_fees": 0.01,
@@ -932,7 +943,7 @@ class UsersController extends AppController {
                                             "transaction_type": "send",
                                             "created_at": new Date(),
                                             "coin_id": coinData.id,
-                                            "transaction_id": getFee.logs[0].transactionHash,
+                                            "transaction_id": getFee.transactionHash,
                                             "faldax_fee": faldax_fee,
                                             "actual_network_fees": realNetworkFee,
                                             "estimated_network_fees": network_fee,
@@ -959,7 +970,7 @@ class UsersController extends AppController {
                                 .andWhere("user_id", user_id)
                                 .andWhere("slug", "withdraw");
 
-                            var coin_data = await CoinModel
+                            var coin_data = await CoinsModel
                                 .query()
                                 .first()
                                 .select()
@@ -972,7 +983,7 @@ class UsersController extends AppController {
                             }
 
                             // userData.coinName = coin.coin_code;
-                            userData.amountReceived = parseFloat(userBalanceUpdateValue).toFixed(8);
+                            userData.amountReceived = parseFloat(balanceValueUpdateValue).toFixed(8);
 
                             console.log("userData", userData)
 
@@ -989,14 +1000,22 @@ class UsersController extends AppController {
                                     }
                                 }
                             }
+
+                            return res
+                                .status(200)
+                                .json({
+                                    "status": 200,
+                                    "message": "Ethereum Fees",
+                                    "data": balanceValueUpdateValue
+                                })
+                        } else {
+                            return res
+                                .status(500)
+                                .json({
+                                    "status": 500,
+                                    "message": "Transaction Has been reverted by EVM"
+                                })
                         }
-                        return res
-                            .status(200)
-                            .json({
-                                "status": 200,
-                                "message": "Ethereum Fees",
-                                "data": balanceValueUpdateValue
-                            })
                     } else {
                         return res
                             .status(201)
