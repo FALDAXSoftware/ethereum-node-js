@@ -12,6 +12,7 @@ var i18n = require("i18n");
 const Validator = require('node-input-validator');
 var session = require('express-session')
 var cron = require('node-cron');
+var userreceivehook = require('./helpers/user-receive-hook')
 // var coinController = require("./controllers/v1/CoinsController")
 
 app.use(cors())
@@ -36,7 +37,8 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-
+//ETH Listiner
+userreceivehook.userETHRecive();
 
 app.all('/*', function (req, res, next) {
   // CORS headers
