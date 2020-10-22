@@ -16,6 +16,7 @@ app.get("/api/v1/get-currency-converted-value", CoinsRoute.getEquivalentValue);
 app.get("/api/v1/get-account-balance", CoinsRoute.getBalanceValue);
 app.post("/api/v1/get-ethereum-fees", CoinsRoute.getEstimatedFees);
 app.post("/api/v1/send-user-ethereum", CoinsRoute.sendTest);
+app.get("/api/v1/get-transaction-list", CoinsRoute.getAllTransactionList)
 
 app.use(function (req, res, next) {
     var err = new Error('Resource Not Found');
