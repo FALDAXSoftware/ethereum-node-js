@@ -36,6 +36,11 @@ var WalletModel = require('../../models/v1/WalletModel');
 var WalletHistoryModel = require('../../models/v1/WalletHistory');
 var TransactionTableModel = require('../../models/v1/TransactionTableModel');
 var UserNotificationModel = require("../../models/v1/UserNotifcationModel");
+var CurrencyConversionModel = require("../../models/v1/CurrencyConversion");
+
+var Web3 = require('web3');
+var abi = require('../../helpers/abi.json');
+var web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_URL));
 
 /**
  * Users
@@ -46,7 +51,7 @@ class UsersController extends AppController {
 
     constructor() {
         super();
-
+        var web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_URL));
     }
 
     // Get User Address
@@ -739,6 +744,9 @@ class UsersController extends AppController {
         }
     }
 
+    /*
+  Ethereum Estimate Fees
+  */
     async getBalanceValue(req, res) {
         try {
             var getAccountBalance = await transactionHelper.balanceData();
@@ -770,6 +778,10 @@ class UsersController extends AppController {
             console.log(error);
         }
     }
+
+    /*
+    Ethereum Send Funds
+    */
     async sendTest(req, res) {
         try {
             let req_body = req.body;
@@ -785,7 +797,7 @@ class UsersController extends AppController {
                 .query()
                 .first()
                 // .where('deleted_at', null)
-                .andWhere('coin_code', process.env.COIN)
+                .andWhere('coin_code', req_body.coin)
                 .andWhere('is_active', true)
                 // .andWhere('type', 2)
                 .orderBy('id', 'DESC')
@@ -824,13 +836,166 @@ class UsersController extends AppController {
                             var fees = gasPrice * gasUsed;
                             var realNetworkFee = web3.utils.fromWei(fees.toString(), 'ether');
                             var balanceUpdate = parseFloat(faldax_fee) + parseFloat(Math.abs(realNetworkFee))
+                            var balanceValueUpdateValue = parseFloat(amount) + parseFloat(balanceUpdate);
+                            var balanceValueUpdate = parseFloat(walletData.balance) - parseFloat(balanceValueUpdateValue);
+                            var placedBlanaceValueUpdate = parseFloat(walletData.placed_balance) - parseFloat(balanceValueUpdateValue)
+                            console.log("balanceValueUpdate", balanceValueUpdate)
+                            console.log("placedBlanaceValueUpdate", placedBlanaceValueUpdate);
+
+                            var walletDataUpdate = await WalletModel
+                                .query()
+                                .where("deleted_at", null)
+                                .andWhere("user_id", user_id)
+                                .andWhere("coin_id", coinData.id)
+                                .andWhere("is_admin", is_admin)
+                                .patch({
+                                    "balance": balanceValueUpdate,
+                                    "placed_balance": placedBlanaceValueUpdate
+                                })
+
+                            var getFiatValues = await getFiatValuHelper.getFiatValue(process.env.COIN);
+
+                            console.log("getFiatValues", getFiatValues)
+
+
+                            var transactionData = await WalletHistoryModel
+                                .query()
+                                .insert({
+                                    "source_address": walletData.receive_address,
+                                    "destination_address": destination_address,
+                                    "amount": balanceValueUpdateValue,
+                                    "actual_amount": amount,
+                                    "transaction_type": "send",
+                                    "created_at": new Date(),
+                                    "coin_id": coinData.id,
+                                    "transaction_id": getFee.logs[0].transactionHash,
+                                    "faldax_fee": faldax_fee,
+                                    "actual_network_fees": realNetworkFee,
+                                    "estimated_network_fees": network_fee,
+                                    "user_id": walletData.user_id,
+                                    "is_admin": is_admin,
+                                    "fiat_values": getFiatValues
+                                });
+
+                            var transactionValue = await TransactionTableModel
+                                .query()
+                                .insert({
+                                    "source_address": walletData.receive_address,
+                                    "destination_address": destination_address,
+                                    "amount": balanceValueUpdateValue,
+                                    "actual_amount": amount,
+                                    "transaction_type": "send",
+                                    "created_at": new Date(),
+                                    "coin_id": coinData.id,
+                                    "transaction_id": getFee.logs[0].transactionHash,
+                                    "faldax_fee": faldax_fee,
+                                    "actual_network_fees": realNetworkFee,
+                                    "estimated_network_fees": 0.01,
+                                    "transaction_from": "Send to Destination",
+                                    "user_id": walletData.user_id,
+                                    "is_admin": is_admin
+                                });
+
+                            if (is_admin == false) {
+                                var walletBalance = await WalletModel
+                                    .query()
+                                    .first()
+                                    .where("deleted_at", null)
+                                    .andWhere("coin_id", coinData.id)
+                                    .andWhere("is_admin", true)
+                                    .andWhere("user_id", process.env.ADMIN_ID)
+                                    .orderBy('id', 'DESC');
+
+                                if (walletBalance != undefined) {
+                                    var amountToBeAdded = 0.0
+                                    amountToBeAdded = parseFloat(faldax_fee)
+                                    console.log("amountToBeAdded", amountToBeAdded)
+                                    console.log("walletBalance.balance", walletBalance.balance);
+                                    var updateWalletBalance = await WalletModel
+                                        .query()
+                                        .where("deleted_at", null)
+                                        .andWhere("coin_id", coinData.id)
+                                        .andWhere("is_admin", true)
+                                        .andWhere("user_id", process.env.ADMIN_ID)
+                                        .patch({
+                                            "balance": parseFloat(walletBalance.balance) + parseFloat(amountToBeAdded),
+                                            "placed_balance": parseFloat(walletBalance.placed_balance) + parseFloat(amountToBeAdded)
+                                        });
+
+                                    var walletHistoryValue = await WalletHistoryModel
+                                        .query()
+                                        .insert({
+                                            "source_address": walletData.receive_address,
+                                            "destination_address": walletBalance.receive_address,
+                                            "amount": parseFloat(amountToBeAdded).toFixed(8),
+                                            "actual_amount": amount,
+                                            "transaction_type": "send",
+                                            "created_at": new Date(),
+                                            "coin_id": coinData.id,
+                                            "transaction_id": getFee.logs[0].transactionHash,
+                                            "faldax_fee": faldax_fee,
+                                            "actual_network_fees": realNetworkFee,
+                                            "estimated_network_fees": network_fee,
+                                            "user_id": 36,
+                                            "is_admin": true,
+                                            "fiat_values": getFiatValues
+                                        })
+                                }
+                            }
+
+                            var userData = await UsersModel
+                                .query()
+                                .first()
+                                .select()
+                                .where("deleted_at", null)
+                                .andWhere("is_active", true)
+                                .andWhere("id", user_id);
+
+                            var userNotification = await UserNotificationModel
+                                .query()
+                                .first()
+                                .select()
+                                .where("deleted_at", null)
+                                .andWhere("user_id", user_id)
+                                .andWhere("slug", "withdraw");
+
+                            var coin_data = await CoinModel
+                                .query()
+                                .first()
+                                .select()
+                                .where("id", coinData.id);
+
+                            if (coin_data != undefined) {
+                                userData.coinName = coin_data.coin;
+                            } else {
+                                userData.coinName = "-";
+                            }
+
+                            // userData.coinName = coin.coin_code;
+                            userData.amountReceived = parseFloat(userBalanceUpdateValue).toFixed(8);
+
+                            console.log("userData", userData)
+
+                            if (userNotification != undefined) {
+                                if (userNotification.email == true || userNotification.email == "true") {
+                                    if (userData.email != undefined) {
+                                        console.log(userData);
+                                        await Helper.SendEmail("withdraw", userData)
+                                    }
+                                }
+                                if (userNotification.text == true || userNotification.text == "true") {
+                                    if (userData.phone_number != undefined && userData.phone_number != null && userData.phone_number != '') {
+                                        await Helper.sendSMS("withdraw", userData)
+                                    }
+                                }
+                            }
                         }
                         return res
                             .status(200)
                             .json({
                                 "status": 200,
                                 "message": "Ethereum Fees",
-                                "data": { "fee": getFee }
+                                "data": balanceValueUpdateValue
                             })
                     } else {
                         return res
@@ -859,6 +1024,83 @@ class UsersController extends AppController {
 
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    /*
+    Ethereum Get All Transactions
+    */
+    async getAllTransactionList(req, res) {
+        try {
+            console.log("req.url", req.url)
+            var coinValue = req.query.coin;
+            // console.log("process.env.COIN", process.env.COI)
+
+            console.log("req.query.coin", req.query.coin)
+
+            var coinData = await CoinsModel
+                .query()
+                .first()
+                .select("id", "deleted_at", "is_active", "coin_code", "iserc", "coin_precision")
+                .where("deleted_at", null)
+                .andWhere("is_active", true)
+                .andWhere("coin_code", coinValue)
+                .orderBy("id", "DESC");
+
+            console.log("coinData", coinData)
+
+            var getTransactionData = await WalletHistoryModel
+                .query()
+                .select("transaction_type", "id", "amount", "transaction_id", "actual_network_fees", "created_at")
+                .where("deleted_at", null)
+                .andWhere("coin_id", coinData.id);
+            console.log("getTransactionData", getTransactionData)
+
+            var coinFiatValue = await CurrencyConversionModel
+                .query()
+                .first()
+                .select()
+                .where("deleted_at", null)
+                .andWhere("coin_id", coinData.id)
+                .orderBy("id", "DESC");
+
+            var responseObject = {}
+
+            var transfers = [];
+
+            console.log("getTransactionData", getTransactionData.length)
+
+            for (var i = 0; i < 30; i++) {
+                var pushObject = {};
+                pushObject = {
+                    type: getTransactionData[i].transaction_type,
+                    baseValue: (getTransactionData[i].amount * coinData.coin_precision),
+                    baseValueString: getTransactionData[i].amount * coinData.coin_precision,
+                    coin: coinData.coin_code,
+                    createdTime: moment(getTransactionData[i].getTransactionData).format("DD-MM-YYYY h:mm:ss"),
+                    date: moment(getTransactionData[i].created_at).format("DD-MM-YYYY h:mm:ss"),
+                    feeString: getTransactionData[i].actual_network_fees * coinData.coin_precision,
+                    normalizedTxHash: getTransactionData[i].transaction_id,
+                    txid: (getTransactionData[i].transaction_id),
+                    usdRate: (coinFiatValue != undefined && coinFiatValue.quote != undefined) ? (coinFiatValue.quote["USD"].price) : (0.0),
+                    usd: (coinFiatValue != undefined && coinFiatValue.quote != undefined) ? ((getTransactionData[i].amount) * coinFiatValue.quote["USD"].price) : (0.0),
+                    value: Number(parseFloat(getTransactionData[i].amount * coinData.coin_precision).toFixed(8)),
+                    valueString: (getTransactionData[i].amount * coinData.coin_precision).toString(),
+                    wallet: process.env.CONTRACT_ADDRESS
+                }
+                transfers.push(pushObject)
+            }
+            responseObject.coin = coinData.coin_code;
+            responseObject.transfers = transfers;
+            return res
+                .status(200)
+                .json({
+                    "status": 200,
+                    "data": responseObject
+                })
+
+        } catch (error) {
+            console.log("error", error);
         }
     }
 }
