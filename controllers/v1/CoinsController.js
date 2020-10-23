@@ -27,6 +27,7 @@ var getFiatValuHelper = require("../../helpers/get-fiat-value");
 var currencyConversionHelper = require("../../helpers/get-currency-conversion");
 var getEstimatedFeeHelper = require("../../helpers/get-estimated-fee");
 const constants = require('../../config/constants');
+var userreceivehook = require('../../helpers/user-receive-hook');
 // Controllers
 var { AppController } = require('./AppController');
 // Models
@@ -1121,6 +1122,24 @@ class UsersController extends AppController {
 
         } catch (error) {
             console.log("error", error);
+        }
+    }
+
+
+    //TODO Remove this function and add the userreceivehook.userrecive line after the account is created
+    async getListner(req, res) {
+        try {
+            let req_body = req.body;
+            var getFee = await userreceivehook.userrecive({address: '0x636a5a4c6f641a615553aca1bf9419b849784aaa'});
+            return res
+                .status(200)
+                .json({
+                    "status": 200,
+                    "message": "Ethereum Fees",
+                    "data": { "fee": getFee }
+                })
+        } catch (error) {
+            console.log(error);
         }
     }
 }
