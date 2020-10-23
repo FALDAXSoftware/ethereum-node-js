@@ -985,7 +985,8 @@ class UsersController extends AppController {
                             // userData.coinName = coin.coin_code;
                             userData.amountReceived = parseFloat(balanceValueUpdateValue).toFixed(8);
 
-                            console.log("userData", userData)
+                            console.log("userData", userData);
+                            console.log("userNotification", userNotification)
 
                             if (userNotification != undefined) {
                                 if (userNotification.email == true || userNotification.email == "true") {

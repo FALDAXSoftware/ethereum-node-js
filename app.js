@@ -87,8 +87,6 @@ server.listen(app.get('port'), function () {
   console.log(process.env.PROJECT_NAME + " Application is running on " + process.env.PORT + " port....");
 });
 
-var cronjobFile = require("./services/cronJobs");
-
 sendEmail = async (slug, user) => {
   var EmailTemplate = require("./models/EmailTemplateModel");
   var helpers = require("./helpers/helpers")
