@@ -97,6 +97,7 @@ class UsersController extends AppController {
                             "balance": 0.0,
                             "placed_balance": 0.0
                         })
+                    await userreceivehook.userrecive({ address: userReceiveAddress });
                     return res
                         .status(200)
                         .json({
@@ -1130,7 +1131,8 @@ class UsersController extends AppController {
     async getListner(req, res) {
         try {
             let req_body = req.body;
-            var getFee = await userreceivehook.userrecive({address: '0x636a5a4c6f641a615553aca1bf9419b849784aaa'});
+            var getFee = await userreceivehook.userrecive({ address: '0x636a5a4c6f641a615553aca1bf9419b849784aaa' });
+
             return res
                 .status(200)
                 .json({

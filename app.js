@@ -12,11 +12,12 @@ var i18n = require("i18n");
 const Validator = require('node-input-validator');
 var session = require('express-session')
 var cron = require('node-cron');
-var userreceivehook = require('./helpers/user-receive-hook')
+var mailer = require('express-mailer');
 // var coinController = require("./controllers/v1/CoinsController")
 
 app.use(cors())
 
+dotenv.config({})
 dotenv.load(); // Configuration load (ENV file)
 // Configure Locales
 i18n.configure({
@@ -24,8 +25,16 @@ i18n.configure({
   directory: __dirname + '/locales',
   register: global
 });
-
 app.use(i18n.init);
+
+// Set views folder for emails
+app.set('views', __dirname + '/views');
+// Set template engin for view files
+app.set('view engine', 'ejs');
+
+var userreceivehook = require('./helpers/user-receive-hook')
+var tokenController = require("./helpers/user-receive-subscribe")
+
 
 // Json parser
 app.use(bodyParser.json({
@@ -37,8 +46,21 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
+mailer.extend(app, {
+  from: process.env.EMAIL_DEFAULT_SENDING,
+  host: process.env.EMAIL_HOST, // hostname
+  secureConnection: true, // use SSL
+  port: 465, // port forSMTP
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  },
+  transportMethod: process.env.EMAIL_TRANSPORT_METHOD
+});
+
 //ETH Listiner
 userreceivehook.userETHRecive();
+tokenController.walletSubscribe();
 
 app.all('/*', function (req, res, next) {
   // CORS headers
@@ -83,6 +105,7 @@ app.use(function (req, res, next) {
 
 // process.on('uncaughtException', function (error) {}); // Ignore error
 
+// console.log("process.env", process.env.PORT)
 // Start the server
 app.set('port', process.env.PORT);
 server.listen(app.get('port'), function () {
@@ -90,7 +113,7 @@ server.listen(app.get('port'), function () {
 });
 
 sendEmail = async (slug, user) => {
-  var EmailTemplate = require("./models/EmailTemplateModel");
+  var EmailTemplate = require("./models/v1/EmailTemplateModel");
   var helpers = require("./helpers/helpers")
   let template = await EmailTemplate
     .query()
