@@ -17,136 +17,148 @@ var userSendNotification = async (data) => {
 
   console.log("data", data)
 
-  var coinData = await CoinsModel
+  var walletHistoryData = await WalletHistoryModel
     .query()
     .first()
     .select()
     .where("deleted_at", null)
-    .andWhere("is_active", true)
-    .andWhere("coin", data.coin)
-    .orderBy("id", "DESC");
+    .andWhere("transaction_id", data.transaction_hash);
 
-  console.log("coinData", coinData)
+  console.log("walletHistoryData", walletHistoryData)
 
-  if (coinData != undefined) {
-    var walletData = await WalletModel
+  if (walletHistoryData == undefined) {
+    var coinData = await CoinsModel
       .query()
       .first()
       .select()
       .where("deleted_at", null)
-      .andWhere("coin_id", coinData.id)
-      .andWhere("receive_address", data.destination_address)
+      .andWhere("is_active", true)
+      .andWhere("coin", data.coin)
       .orderBy("id", "DESC");
 
-    console.log("walletData", walletData)
+    console.log("coinData", coinData)
 
-    if (walletData != undefined) {
-      // var amount = 
-      var balanceToBeUpdated = Number(parseFloat(parseFloat(walletData.balance) + parseFloat(data.amount)).toFixed(8));
-      var placedBalanceToBeUpdated = Number(parseFloat(parseFloat(walletData.placed_balance) + parseFloat(data.amount)).toFixed(8));
-      let walletHistory = {
-        coin_id: coinData.id,
-        source_address: data.source,
-        destination_address: data.destination_address,
-        user_id: walletData.user_id,
-        amount: Number(parseFloat(data.amount).toFixed(8)),
-        transaction_type: 'receive',
-        transaction_id: data.transaction_hash
-      }
-
-
-      console.log("walletHistory", walletHistory)
-      // Entry in wallet history
-      await WalletHistoryModel
+    if (coinData != undefined) {
+      var walletData = await WalletModel
         .query()
-        .insert({
-          ...walletHistory
-        });
-
-      let transactionHistory = {
-        coin_id: coinData.id,
-        source_address: data.source,
-        destination_address: data.destination_address,
-        user_id: walletData.user_id,
-        amount: Number(parseFloat(data.amount).toFixed(8)),
-        transaction_type: 'receive',
-        transaction_id: data.transaction_hash,
-        actual_amount: Number(parseFloat(data.amount).toFixed(8)),
-        receiver_user_balance_before: walletData.balance,
-        // transaction_from: process.env.RECEIVE_TO_DESTINATION,
-        actual_network_fees: 0.0,
-        faldax_fee: 0.0,
-        estimated_network_fees: 0.0,
-        residual_amount: 0.0,
-        is_done: false,
-        is_admin: false
-      }
-
-      console.log("transactionHistory", transactionHistory)
-
-      await TransactionTabelModel
-        .query()
-        .insert({
-          ...transactionHistory
-        });
-
-      await WalletModel
-        .query()
+        .first()
+        .select()
         .where("deleted_at", null)
         .andWhere("coin_id", coinData.id)
         .andWhere("receive_address", data.destination_address)
-        .patch({
-          balance: balanceToBeUpdated,
-          placed_balance: placedBalanceToBeUpdated
-        });
-
-      var userData = await UsersModel
-        .query()
-        .first()
-        .select()
-        .where("deleted_at", null)
-        .andWhere("is_active", true)
-        .andWhere("id", walletData.user_id)
         .orderBy("id", "DESC");
 
-      console.log("userData", userData)
+      console.log("walletData", walletData)
 
-      var userNotification = await UserNotificationModel
-        .query()
-        .first()
-        .select()
-        .where("user_id", walletData.user_id)
-        .andWhere("deleted_at", null)
-        .andWhere("slug", "receive")
-        .orderBy("id", "DESC");
+      if (walletData != undefined) {
+        // var amount = 
+        var balanceToBeUpdated = Number(parseFloat(parseFloat(walletData.balance) + parseFloat(data.amount)).toFixed(8));
+        var placedBalanceToBeUpdated = Number(parseFloat(parseFloat(walletData.placed_balance) + parseFloat(data.amount)).toFixed(8));
+        let walletHistory = {
+          coin_id: coinData.id,
+          source_address: data.source,
+          destination_address: data.destination_address,
+          user_id: walletData.user_id,
+          amount: Number(parseFloat(data.amount).toFixed(8)),
+          transaction_type: 'receive',
+          transaction_id: data.transaction_hash
+        }
 
-      console.log(userNotification)
-      // Pass Amount
-      if (coinData != undefined) {
-        userData.coinName = coinData.coin;
-      } else {
-        userData.coinName = "-";
-      }
-      userData.amountReceived = Number(parseFloat(data.amount).toFixed(8));
 
-      console.log("userData", userData)
+        console.log("walletHistory", walletHistory)
+        // Entry in wallet history
+        await WalletHistoryModel
+          .query()
+          .insert({
+            ...walletHistory
+          });
 
-      if (userNotification != undefined) {
-        if (userNotification.email == true || userNotification.email == "true") {
-          if (userData.email != undefined) {
-            console.log(userData);
-            await Helper.SendEmail("receive", userData)
+        let transactionHistory = {
+          coin_id: coinData.id,
+          source_address: data.source,
+          destination_address: data.destination_address,
+          user_id: walletData.user_id,
+          amount: Number(parseFloat(data.amount).toFixed(8)),
+          transaction_type: 'receive',
+          transaction_id: data.transaction_hash,
+          actual_amount: Number(parseFloat(data.amount).toFixed(8)),
+          receiver_user_balance_before: walletData.balance,
+          // transaction_from: process.env.RECEIVE_TO_DESTINATION,
+          actual_network_fees: 0.0,
+          faldax_fee: 0.0,
+          estimated_network_fees: 0.0,
+          residual_amount: 0.0,
+          is_done: false,
+          is_admin: false
+        }
+
+        console.log("transactionHistory", transactionHistory)
+
+        await TransactionTabelModel
+          .query()
+          .insert({
+            ...transactionHistory
+          });
+
+        await WalletModel
+          .query()
+          .where("deleted_at", null)
+          .andWhere("coin_id", coinData.id)
+          .andWhere("receive_address", data.destination_address)
+          .patch({
+            balance: balanceToBeUpdated,
+            placed_balance: placedBalanceToBeUpdated
+          });
+
+        var userData = await UsersModel
+          .query()
+          .first()
+          .select()
+          .where("deleted_at", null)
+          .andWhere("is_active", true)
+          .andWhere("id", walletData.user_id)
+          .orderBy("id", "DESC");
+
+        console.log("userData", userData)
+
+        var userNotification = await UserNotificationModel
+          .query()
+          .first()
+          .select()
+          .where("user_id", walletData.user_id)
+          .andWhere("deleted_at", null)
+          .andWhere("slug", "receive")
+          .orderBy("id", "DESC");
+
+        console.log(userNotification)
+        // Pass Amount
+        if (coinData != undefined) {
+          userData.coinName = coinData.coin;
+        } else {
+          userData.coinName = "-";
+        }
+        userData.amountReceived = Number(parseFloat(data.amount).toFixed(8));
+
+        console.log("userData", userData)
+
+        if (userNotification != undefined) {
+          if (userNotification.email == true || userNotification.email == "true") {
+            if (userData.email != undefined) {
+              console.log(userData);
+              await Helper.SendEmail("receive", userData)
+            }
+          }
+          if (userNotification.text == true || userNotification.text == "true") {
+            if (userData.phone_number != undefined && userData.phone_number != null && userData.phone_number != '') {
+              await Helper.sendSMS("receive", userData)
+            }
           }
         }
-        if (userNotification.text == true || userNotification.text == "true") {
-          if (userData.phone_number != undefined && userData.phone_number != null && userData.phone_number != '') {
-            await Helper.sendSMS("receive", userData)
-          }
-        }
       }
+
     }
-
   }
+
 }
 
 var userrecive = async (addressinfo) => {
@@ -254,7 +266,8 @@ var userrecive = async (addressinfo) => {
     var tx = await decryptedText.signTransaction(tx);
     await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
       console.log("Topic", a);
-      console.log("DB operations>>>>>>");
+      returndata = a;
+      console.log("DB operations>>>>>>")
       var dataValue = {
         coin: 'DOX',
         amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
@@ -263,8 +276,7 @@ var userrecive = async (addressinfo) => {
         transaction_hash: data.transactionHash
       }
       console.log("dataValue", dataValue);
-      await module.exports.userSendNotification(dataValue);
-      returndata = a;
+      await module.exports.userSendNotification(dataValue)
     })
     return returndata;
   });
