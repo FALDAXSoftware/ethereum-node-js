@@ -35,7 +35,7 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   path: /
   hosts:
-    - pre-prod-ethereum.faldax.com
+    - ethereum-api.faldax.com
   tls: []
 
 resources:
