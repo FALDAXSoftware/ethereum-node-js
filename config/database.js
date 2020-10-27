@@ -2,6 +2,8 @@ const { Model } = require('objection');
 const Knex = require('knex');
 // Initialize knex.
 
+// console.log("process.env.DB_CONNECTION", process.env.DB_CONNECTION)
+
 const knex = Knex({
     client: process.env.DB_CONNECTION,
     connection: {
@@ -12,6 +14,8 @@ const knex = Knex({
         database: process.env.DB_DATABASE
     }
 });
+
+// console.log("knex", knex)
 
 // Give the knex object to objection.
 Model.knex(knex);
