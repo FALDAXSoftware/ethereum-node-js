@@ -38,6 +38,7 @@ var WalletHistoryModel = require('../../models/v1/WalletHistory');
 var TransactionTableModel = require('../../models/v1/TransactionTableModel');
 var UserNotificationModel = require("../../models/v1/UserNotifcationModel");
 var CurrencyConversionModel = require("../../models/v1/CurrencyConversion");
+var AdminSettingModel = require("../../models/v1/AdminSettingModel");
 
 var Web3 = require('web3');
 var abi = require('../../helpers/abi.json');
@@ -1142,6 +1143,39 @@ class UsersController extends AppController {
                 })
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    async healthCheck(req, res) {
+        try {
+
+            var system_health = await AdminSettingModel
+                .query()
+                .first()
+                .select()
+                .where("deleted_at", null)
+                .andWhere("slug", "system_health")
+                .orderBy("id", "DESC");
+
+            if (system_health && system_health.value == "ok_from_db") {
+                return res.status(200).json({
+                    "status": 200,
+                    "message": "System Health is Good.",
+                })
+            } else {
+                return res.status(500).json({
+                    "status": 500,
+                    "message": "System Health is Not Good."
+                })
+            }
+
+        } catch (error) {
+            console.log("error", error);
+            return res.status(500).json({
+                "status": 500,
+                "message": "System Health is Not Good.",
+                error_at: error.stack
+            })
         }
     }
 }
