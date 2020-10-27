@@ -22,9 +22,9 @@ var walletSubscribe = async () => {
     console.log("walletData", walletData)
 
     if (walletData != undefined) {
-        console.log("<br/>walletData.length", walletData.length)
+        console.log("walletData.length", walletData.length);
         for (var i = 0; i < walletData.length; i++) {
-            console.log("walletData[i].receive_address", walletData[i].receive_address)
+            // console.log("walletData[i].receive_address", walletData[i].receive_address)
             await userreceivehook.userrecive({ address: walletData[i].receive_address });
         }
     }
