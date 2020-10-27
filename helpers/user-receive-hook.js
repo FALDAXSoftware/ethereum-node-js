@@ -168,7 +168,7 @@ var userrecive = async (addressinfo) => {
   var web3Contract_ERC20_1 = new web3.eth.Contract(ERC20abi, process.env.ERC20_1);
   var contract_1 = dagger.contract(web3Contract_ERC20_1);
   var filter = contract_1.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
-  console.log(filter);
+  // console.log(filter);
   // watch
   filter.watch(async function (data, removed) {
     console.log('QRXD Recived');
@@ -208,16 +208,16 @@ var userrecive = async (addressinfo) => {
     await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
       console.log("Topic", a);
       returndata = a;
-      var dataValue = {
-        coin: 'QRXD',
-        amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
-        source: (data.returnValues[1]).toLowerCase(),
-        destination_address: (data.returnValues[0]).toLowerCase(),
-        transaction_hash: data.transactionHash
-      }
+      // var dataValue = {
+      //   coin: 'QRXD',
+      //   amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
+      //   source: (data.returnValues[1]).toLowerCase(),
+      //   destination_address: (data.returnValues[0]).toLowerCase(),
+      //   transaction_hash: data.transactionHash
+      // }
 
-      console.log("dataValue", dataValue);
-      await module.exports.userSendNotification(dataValue)
+      // console.log("dataValue", dataValue);
+      // await module.exports.userSendNotification(dataValue)
     })
   });
 
@@ -225,9 +225,9 @@ var userrecive = async (addressinfo) => {
   var web3Contract_ERC20_2 = new web3.eth.Contract(ERC20abi, process.env.ERC20_2);
   var contract_2 = dagger.contract(web3Contract_ERC20_2);
   var filter1 = contract_2.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
-  console.log("filter1", filter1)
+  // console.log("filter1", filter1)
   // watch
-  console.log(filter1);
+  // console.log(filter1);
   filter1.watch(async function (data, removed) {
     console.log("removed", removed);
     console.log("data", data)
@@ -268,44 +268,59 @@ var userrecive = async (addressinfo) => {
       console.log("Topic", a);
       returndata = a;
       console.log("DB operations>>>>>>")
-      var dataValue = {
-        coin: 'DOX',
-        amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
-        source: (data.returnValues[0]).toLowerCase(),
-        destination_address: (data.returnValues[1]).toLowerCase(),
-        transaction_hash: data.transactionHash
-      }
-      console.log("dataValue", dataValue);
-      await module.exports.userSendNotification(dataValue)
+      // var dataValue = {
+      //   coin: 'DOX',
+      //   amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
+      //   source: (data.returnValues[0]).toLowerCase(),
+      //   destination_address: (data.returnValues[1]).toLowerCase(),
+      //   transaction_hash: data.transactionHash
+      // }
+      // console.log("dataValue", dataValue);
+      // await module.exports.userSendNotification(dataValue)
     })
     return returndata;
   });
 }
 
 userETHRecive = async () => {
-  var dagger = new Dagger('wss://kovan.dagger.matic.network');
-  var web3 = new Web3('wss://kovan.infura.io/ws/v3/b0814c44f1de43a1b2024f2c08f0eddc');
-  var web3Contract1 = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
-  var con = dagger.contract(web3Contract1);
-  var filter1 = con.events.Receive({ room: 'latest' });
-  console.log("ETH Listiner Started");
-  // watch
-  filter1.watch(async function (data, removed) {
-    console.log('ETH Recived');
-    //TODO DB
-    console.log(data);
-    var a = await web3.eth.getTransaction(data.transactionHash);
-    console.log(a);
-    var dataValue = {
-      coin: 'ETH',
-      amount: Number(parseFloat(web3.utils.fromWei((a.value).toString(), 'ether')).toFixed(8)),
-      source: (a.from).toLowerCase(),
-      destination_address: (data.returnValues[0]).toLowerCase(),
-      transaction_hash: data.transactionHash
-    }
-    console.log("dataValue", dataValue)
-    await module.exports.userSendNotification(dataValue);
-  });
+  try {
+    var dagger = new Dagger('wss://kovan.dagger.matic.network');
+    // console.log("dagger", dagger)
+    var web3 = new Web3('wss://kovan.infura.io/ws/v3/b0814c44f1de43a1b2024f2c08f0eddc');
+    var web3Contract1 = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
+    var con = dagger.contract(web3Contract1);
+    // dagger.error((err) => {
+    //   console.log("Dagger Error", err)
+    // })
+    console.log("con>>>>>>>>>>>", con)
+    var filter1 = con.events.Receive({ room: 'latest' });
+    console.log("ETH Listiner Started");
+    // watch
+    // filter1.status(async function (data, removed) {
+    //   console.log("data???????", data);
+    //   console.log("removed??????", removed)
+    // })
+    filter1.watch(async function (data, removed) {
+      console.log('ETH Recived');
+      console.log("data????????", data);
+      console.log("removed??????", removed)
+      //TODO DB
+      console.log(data);
+      var a = await web3.eth.getTransaction(data.transactionHash);
+      console.log(a);
+      var dataValue = {
+        coin: 'ETH',
+        amount: Number(parseFloat(web3.utils.fromWei((a.value).toString(), 'ether')).toFixed(8)),
+        source: (a.from).toLowerCase(),
+        destination_address: (data.returnValues[0]).toLowerCase(),
+        transaction_hash: data.transactionHash
+      }
+      console.log("dataValue", dataValue)
+      await module.exports.userSendNotification(dataValue);
+    });
+  } catch (error) {
+    console.log("Error Catched", error)
+  }
 }
 
 module.exports = {
