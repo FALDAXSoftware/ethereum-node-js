@@ -165,61 +165,61 @@ var userrecive = async (addressinfo) => {
   var dagger = new Dagger(process.env.DAGGER_URL);
   var web3 = new Web3(process.env.INFURA_URL);
   //tokens ERC20_1
-  // var web3Contract_ERC20_1 = new web3.eth.Contract(ERC20abi, process.env.ERC20_1);
-  // var contract_1 = dagger.contract(web3Contract_ERC20_1);
-  // var filter = contract_1.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
-  // console.log(filter.route);
-  // // watch
-  // filter.watch(async function (data, removed) {
-  //   console.log('QRXD Recived');
-  //   var a = await web3.eth.getTransaction(data.transactionHash);
-  //   console.log(a);
-  //   //TODO DB
+  var web3Contract_ERC20_1 = new web3.eth.Contract(ERC20abi, process.env.ERC20_1);
+  var contract_1 = dagger.contract(web3Contract_ERC20_1);
+  var filter = contract_1.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
+  console.log(filter.route);
+  // watch
+  filter.watch(async function (data, removed) {
+    console.log('QRXD Recived');
+    var a = await web3.eth.getTransaction(data.transactionHash);
+    console.log(a);
+    //TODO DB
 
-  //   var decryptedText = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY_ETH);
-  //   var contract = new web3.eth.Contract(forwarder, data.returnValues[1]);
-  //   var nonce = await web3.eth.getTransactionCount(decryptedText.address);
-  //   var gasPricewei = await web3.eth.getGasPrice();
-  //   var _gasPriceGwei = web3.utils.fromWei(gasPricewei.toString(), 'gwei');
-  //   var _gasLimit = 60999;
+    var decryptedText = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY_ETH);
+    var contract = new web3.eth.Contract(forwarder, data.returnValues[1]);
+    var nonce = await web3.eth.getTransactionCount(decryptedText.address);
+    var gasPricewei = await web3.eth.getGasPrice();
+    var _gasPriceGwei = web3.utils.fromWei(gasPricewei.toString(), 'gwei');
+    var _gasLimit = 60999;
 
-  //   console.log(nonce);
+    console.log(nonce);
 
-  //   var tx = {
-  //     nonce: "0x" + nonce.toString(16),
-  //     from: decryptedText.address,
-  //     to: data.returnValues[1],
-  //     gasPrice: web3
-  //       .utils
-  //       .toHex(_gasPriceGwei * 1e9),
-  //     gasLimit: web3
-  //       .utils
-  //       .toHex(_gasLimit),
-  //     chainId: 42,
-  //     data: contract
-  //       .methods
-  //       .flushToken(process.env.ERC20_1)
-  //       .encodeABI()
-  //   };
+    var tx = {
+      nonce: "0x" + nonce.toString(16),
+      from: decryptedText.address,
+      to: data.returnValues[1],
+      gasPrice: web3
+        .utils
+        .toHex(_gasPriceGwei * 1e9),
+      gasLimit: web3
+        .utils
+        .toHex(_gasLimit),
+      chainId: 42,
+      data: contract
+        .methods
+        .flushToken(process.env.ERC20_1)
+        .encodeABI()
+    };
 
-  //   console.log(tx);
+    console.log(tx);
 
-  //   var tx = await decryptedText.signTransaction(tx);
-  //   await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
-  //     console.log("Topic", a);
-  //     returndata = a;
-  //     var dataValue = {
-  //       coin: 'QRXD',
-  //       amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
-  //       source: (data.returnValues[1]).toLowerCase(),
-  //       destination_address: (data.returnValues[0]).toLowerCase(),
-  //       transaction_hash: data.transactionHash
-  //     }
+    var tx = await decryptedText.signTransaction(tx);
+    await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
+      console.log("Topic", a);
+      returndata = a;
+      var dataValue = {
+        coin: 'QRXD',
+        amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
+        source: (data.returnValues[0]).toLowerCase(),
+        destination_address: (data.returnValues[1]).toLowerCase(),
+        transaction_hash: data.transactionHash
+      }
 
-  //     console.log("dataValue", dataValue);
-  //     await module.exports.userSendNotification(dataValue)
-  //   })
-  // });
+      console.log("dataValue", dataValue);
+      await module.exports.userSendNotification(dataValue)
+    })
+  });
 
   //tokens ERC20_2
   var web3Contract_ERC20_2 = new web3.eth.Contract(ERC20abi, process.env.ERC20_2);
