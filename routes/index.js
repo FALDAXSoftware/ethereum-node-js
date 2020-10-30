@@ -19,6 +19,8 @@ app.post("/api/v1/send-user-ethereum", CoinsRoute.sendTest);
 app.get("/api/v1/get-transaction-list", CoinsRoute.getAllTransactionList)
 app.get("/api/v1/getListier", CoinsRoute.getListner)
 app.get('/api/v1/health-check', CoinsRoute.healthCheck)
+app.post('/api/v1/encrypt-private-key', CoinsRoute.getEncryptedKey);
+app.post('/api/v1/decrypt-private-key', CoinsRoute.getDecryptKey);
 
 app.use(function (req, res, next) {
     var err = new Error('Resource Not Found');
