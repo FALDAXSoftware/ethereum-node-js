@@ -7,8 +7,10 @@ var decrytpKeyHelper = require("./get-decrypt-private-key");
 var addressData = async () => {
 
   try {
-    var _gasPriceGwei = 60;
-    var _gasLimit = 601999;
+    var web3 = new Web3(process.env.INFURA_URL);
+    var gasPricewei = await web3.eth.getGasPrice();
+    var _gasPriceGwei = web3.utils.fromWei(gasPricewei.toString(), 'gwei');
+    var _gasLimit = 36999;
     var address = '';
     var web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_URL));
     var contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
