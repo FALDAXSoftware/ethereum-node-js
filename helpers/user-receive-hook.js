@@ -163,15 +163,18 @@ var userSendNotification = async (data) => {
 
 var userrecive = async (addressinfo) => {
   var dagger = new Dagger(process.env.DAGGER_URL);
+
+  // console.log("dagger", dagger)
+
   var web3 = new Web3(process.env.INFURA_URL);
   //tokens ERC20_1
   var web3Contract_ERC20_1 = new web3.eth.Contract(ERC20abi, process.env.ERC20_1);
   var contract_1 = dagger.contract(web3Contract_ERC20_1);
   var filter = contract_1.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
-  console.log(filter.route);
+  // console.log(filter);
   // watch
   filter.watch(async function (data, removed) {
-    console.log('QRXD Recived');
+    console.log('QRXD Recived', process.env.CONTRACT_1_COIN);
     var a = await web3.eth.getTransaction(data.transactionHash);
     console.log(a);
     //TODO DB
@@ -209,7 +212,7 @@ var userrecive = async (addressinfo) => {
       console.log("Topic", a);
       returndata = a;
       var dataValue = {
-        coin: 'QRXD',
+        coin: process.env.CONTRACT_1_COIN,
         amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
         source: (data.returnValues[0]).toLowerCase(),
         destination_address: (data.returnValues[1]).toLowerCase(),
@@ -227,7 +230,7 @@ var userrecive = async (addressinfo) => {
   var filter1 = contract_2.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
   console.log("filter1", filter1.route)
   filter1.watch(async function (data, removed) {
-    console.log('DOX Recived');
+    console.log('DOX Recived', process.env.CONTRACT_1_COIN);
     var a = await web3.eth.getTransaction(data.transactionHash);
     console.log(a);
     //TODO DB
@@ -265,7 +268,7 @@ var userrecive = async (addressinfo) => {
       returndata = a;
       console.log("DB operations>>>>>>")
       var dataValue = {
-        coin: 'DOX',
+        coin: process.env.CONTRACT_2_COIN,
         amount: Number(parseFloat(web3.utils.fromWei((data.returnValues[2]).toString(), 'ether')).toFixed(8)),
         source: (data.returnValues[0]).toLowerCase(),
         destination_address: (data.returnValues[1]).toLowerCase(),
