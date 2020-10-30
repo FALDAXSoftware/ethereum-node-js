@@ -33,7 +33,7 @@ var sendData = async (sendInfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 42,
+        chainId: 1,
         data: contract
           .methods
           .transferfromadmin(address, amount)
@@ -66,7 +66,7 @@ var sendData = async (sendInfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 42,
+        chainId: 1,
         data: contract
           .methods
           .transferToken(process.env.ERC20_1, address, amount)
@@ -99,7 +99,7 @@ var sendData = async (sendInfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 42,
+        chainId: 1,
         data: contract
           .methods
           .transferToken(process.env.ERC20_2, address, amount)
