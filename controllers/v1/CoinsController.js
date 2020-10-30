@@ -62,6 +62,14 @@ class UsersController extends AppController {
 
     async createUserAddress(req, res) {
         try {
+
+            return res
+                .status(500)
+                .json({
+                    "status": 500,
+                    "message": "Address Cannot be generated"
+                })
+
             var user_id = req.body.user_id;
             var label = req.body.label;
             var coinData = await CoinsModel
