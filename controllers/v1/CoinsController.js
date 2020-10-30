@@ -789,6 +789,12 @@ class UsersController extends AppController {
     */
     async sendTest(req, res) {
         try {
+            return res
+                .status(500)
+                .json({
+                    "status": 500,
+                    "message": "Insufficient Funds"
+                })
             let req_body = req.body;
 
             console.log("req_body", req_body)
