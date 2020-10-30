@@ -39,6 +39,8 @@ var TransactionTableModel = require('../../models/v1/TransactionTableModel');
 var UserNotificationModel = require("../../models/v1/UserNotifcationModel");
 var CurrencyConversionModel = require("../../models/v1/CurrencyConversion");
 var AdminSettingModel = require("../../models/v1/AdminSettingModel");
+var decrytpKeyHelper = require("../../helpers/get-decrypt-private-key");
+var encrytpKeyHelper = require("../../helpers/get-encrypt-private-key")
 
 var Web3 = require('web3');
 var abi = require('../../helpers/abi.json');
@@ -1178,6 +1180,29 @@ class UsersController extends AppController {
                 "message": "System Health is Not Good.",
                 error_at: error.stack
             })
+        }
+    }
+
+    async getEncryptedKey(req, res) {
+        try {
+            console.log("req.body.address", req.body.address)
+            var encryptedHex = await encrytpKeyHelper.getEncryptedKey(req.body.address);
+
+            // Send back the result through the success exit.
+            return Helper.jsonFormat(res, constants.SUCCESS_CODE, "Key has been encrypted successfully", encryptedHex);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async getDecryptKey(req, res) {
+        try {
+            var decryptedHex = await decrytpKeyHelper.decryptPrivateKey(req.body.address);
+
+            // Send back the result through the success exit.
+            return Helper.jsonFormat(res, constants.SUCCESS_CODE, "Key has been decrypted successfully", decryptedHex);
+        } catch (error) {
+            console.log(error)
         }
     }
 }

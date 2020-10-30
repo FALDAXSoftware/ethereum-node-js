@@ -2,13 +2,15 @@ var fetch = require('node-fetch')
 var Web3 = require('web3');
 var abi = require('./abi.json');
 var ERC20abi = require('./ERC20abi.json');
+var decrytpKeyHelper = require("./get-decrypt-private-key");
 
 var sendData = async (sendInfo) => {
 
   try {
     var returndata = '';
     var web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_URL));
-    var decryptedText = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY_ETH);
+    var encryptedHex = await decrytpKeyHelper.decryptPrivateKey(process.env.PRIVATE_KEY_ETH);
+    var decryptedText = web3.eth.accounts.privateKeyToAccount(encryptedHex);
     var gasPricewei = await web3.eth.getGasPrice();
     if (sendInfo.coin == "ETH") {
       var contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);

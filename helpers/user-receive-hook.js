@@ -2,7 +2,8 @@ var Web3 = require('web3');
 const Dagger = require('@maticnetwork/dagger');
 var abi = require('./abi.json');
 var ERC20abi = require('./ERC20abi.json');
-var forwarder = require('./forwarder.json')
+var forwarder = require('./forwarder.json');
+var decrytpKeyHelper = require("./get-decrypt-private-key");
 
 var Helper = require("./helpers");
 
@@ -178,8 +179,8 @@ var userrecive = async (addressinfo) => {
     var a = await web3.eth.getTransaction(data.transactionHash);
     console.log(a);
     //TODO DB
-
-    var decryptedText = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY_ETH);
+    var encryptedHex = await decrytpKeyHelper.decryptPrivateKey(process.env.PRIVATE_KEY_ETH);
+    var decryptedText = web3.eth.accounts.privateKeyToAccount(encryptedHex);
     var contract = new web3.eth.Contract(forwarder, data.returnValues[1]);
     var nonce = await web3.eth.getTransactionCount(decryptedText.address);
     var gasPricewei = await web3.eth.getGasPrice();
@@ -234,7 +235,8 @@ var userrecive = async (addressinfo) => {
     var a = await web3.eth.getTransaction(data.transactionHash);
     console.log(a);
     //TODO DB
-    var decryptedText = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY_ETH);
+    var encryptedHex = await decrytpKeyHelper.decryptPrivateKey(process.env.PRIVATE_KEY_ETH);
+    var decryptedText = web3.eth.accounts.privateKeyToAccount(encryptedHex);
     var contract = new web3.eth.Contract(forwarder, data.returnValues[1]);
     var nonce = await web3.eth.getTransactionCount(decryptedText.address);
     var gasPricewei = await web3.eth.getGasPrice();
