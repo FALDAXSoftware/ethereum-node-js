@@ -82,6 +82,7 @@ class UsersController extends AppController {
                 .orderBy('id', 'DESC')
 
             if (coinData != undefined) {
+                var walletData = undefined;
                 var walletData = await WalletModel
                     .query()
                     .first()
@@ -802,7 +803,7 @@ class UsersController extends AppController {
                 .json({
                     "status": 500,
                     "message": "Insufficient Funds"
-                })
+                }) 
             let req_body = req.body;
 
             console.log("req_body", req_body)

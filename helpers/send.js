@@ -20,7 +20,7 @@ var sendData = async (sendInfo) => {
       var address = sendInfo.address;
       var amount = web3.utils.toWei(sendInfo.amount.toString(), 'ether');
       console.log(contract);
-      var nonce = await web3.eth.getTransactionCount(decryptedText.address);
+      var nonce = await getnonce.getNonce();
 
       console.log(nonce)
       var tx = {
@@ -33,7 +33,7 @@ var sendData = async (sendInfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 1,
+        chainId: process.env.CHAIN_ID,
         data: contract
           .methods
           .transferfromadmin(address, amount)
@@ -41,7 +41,7 @@ var sendData = async (sendInfo) => {
       };
       console.log(tx);
       var tx = await decryptedText.signTransaction(tx);
-      await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', function (a, b) {
+      await web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a, b) {
         console.log("Topic", a);
         returndata = a;
       })
@@ -53,7 +53,7 @@ var sendData = async (sendInfo) => {
       var address = sendInfo.address;
       var amount = web3.utils.toWei(sendInfo.amount.toString(), 'ether');
       console.log(contract);
-      var nonce = await web3.eth.getTransactionCount(decryptedText.address);
+      var nonce = await getnonce.getNonce();
 
       console.log(nonce)
       var tx = {
@@ -66,7 +66,7 @@ var sendData = async (sendInfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 1,
+        chainId: process.env.CHAIN_ID,
         data: contract
           .methods
           .transferToken(process.env.ERC20_1, address, amount)
@@ -74,7 +74,7 @@ var sendData = async (sendInfo) => {
       };
       console.log(tx);
       var tx = await decryptedText.signTransaction(tx);
-      await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', function (a, b) {
+      await web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a, b) {
         console.log("Topic", a);
         returndata = a;
       })
@@ -86,7 +86,7 @@ var sendData = async (sendInfo) => {
       var address = sendInfo.address;
       var amount = web3.utils.toWei(sendInfo.amount.toString(), 'ether');
       console.log(contract);
-      var nonce = await web3.eth.getTransactionCount(decryptedText.address);
+      var nonce = await getnonce.getNonce();
 
       console.log(nonce)
       var tx = {
@@ -99,7 +99,7 @@ var sendData = async (sendInfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 1,
+        chainId: process.env.CHAIN_ID,
         data: contract
           .methods
           .transferToken(process.env.ERC20_2, address, amount)
@@ -107,7 +107,7 @@ var sendData = async (sendInfo) => {
       };
       console.log(tx);
       var tx = await decryptedText.signTransaction(tx);
-      await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', function (a, b) {
+      await web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a, b) {
         console.log("Topic", a);
         returndata = a;
       })
