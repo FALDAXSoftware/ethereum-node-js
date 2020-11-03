@@ -1,9 +1,11 @@
-var fetch = require('node-fetch');
 var Web3 = require('web3');
 var abi = require('./abi.json');
-var encodeCredentials = require("./encode-auth");
 var decrytpKeyHelper = require("./get-decrypt-private-key");
 var getnonce = require('./get-nonce');
+var WalletModel = require("../models/v1/WalletModel");
+var UserModel = require("../models/v1/UsersModel");
+var CoinsModel = require("../models/v1/CoinsModel");
+var helperFunction = require("./helpers");
 
 var addressData = async () => {
 
@@ -13,13 +15,13 @@ var addressData = async () => {
     var _gasPriceGwei = web3.utils.fromWei(gasPricewei.toString(), 'gwei');
     var _gasPriceGwei = 900;
     var _gasLimit = 260999;
-    var address = '';
+    // var address = '';
     var web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_URL));
     var contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
     var encryptedHex = await decrytpKeyHelper.decryptPrivateKey(process.env.PRIVATE_KEY_ETH);
     var decryptedText = web3.eth.accounts.privateKeyToAccount(encryptedHex);
     console.log("decryptedText", decryptedText)
-    var nonce = await getnonce.getNonce(); 
+    var nonce = await getnonce.getNonce();
 
     console.log(nonce)
     var tx = {
@@ -41,11 +43,49 @@ var addressData = async () => {
 
     var tx = await decryptedText.signTransaction(tx);
     console.log(tx);
-    web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a) {
+    web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', async function (a) {
       console.log("TX Hash", a);
-    }).on('receipt', function (a) {
-        console.log("Topic", a);
-        var address = ('0x' + a.logs[0].data.slice(26)).toString();
+    }).on('receipt', async function (a) {
+      console.log("Topic", a);
+      var address = ('0x' + a.logs[0].data.slice(26)).toString();
+      var coinData = await CoinsModel
+        .query()
+        .select()
+        .first()
+        .where("deleted_at", null)
+        .andWhere("is_active", true)
+        .andWhere("coin_code", process.env.COIN)
+        .orderBy("id", "DESC");
+
+      if (coinData != undefined) {
+        var walletData = await WalletModel
+          .query()
+          .first()
+          .select()
+          .where("deleted_at", null)
+          .andWhere("coin_id", coinData.id)
+          .andWhere("receive_address", null)
+
+        if (walletData != undefined) {
+          var walletValue = await walletData
+            .$query()
+            .patch({
+              "receive_address": address
+            });
+
+          var userData = await UserModel
+            .query()
+            .select()
+            .where("deleted_at", null)
+            .andWhere("is_active", true)
+            .andWhere("id", walletData.user_id)
+
+          if (userData != undefined) {
+            await helperFunction.SendEmail("wallet_created_successfully", userData)
+          }
+        }
+      }
+
     });
     // console.log(address);
     // return address;
