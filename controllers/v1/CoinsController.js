@@ -62,6 +62,14 @@ class UsersController extends AppController {
 
     async createUserAddress(req, res) {
         try {
+
+            // return res
+            //     .status(500)
+            //     .json({
+            //         "status": 500,
+            //         "message": "Address Cannot be generated"
+            //     })
+
             var user_id = req.body.user_id;
             var label = req.body.label;
             var coinData = await CoinsModel
@@ -74,6 +82,7 @@ class UsersController extends AppController {
                 .orderBy('id', 'DESC')
 
             if (coinData != undefined) {
+                var walletData = undefined;
                 var walletData = await WalletModel
                     .query()
                     .first()
@@ -85,12 +94,12 @@ class UsersController extends AppController {
                 console.log("walletData", walletData)
 
                 if (walletData == undefined) {
-                    var userReceiveAddress = await addressHelper.addressData();
+                    var userReceiveAddress = addressHelper.addressData();
                     console.log(userReceiveAddress);
                     var dataValue = await WalletModel
                         .query()
                         .insertAndFetch({
-                            "receive_address": userReceiveAddress,
+                            "receive_address": "",
                             "coin_id": coinData.id,
                             "user_id": user_id,
                             "deleted_at": null,
@@ -100,7 +109,6 @@ class UsersController extends AppController {
                             "balance": 0.0,
                             "placed_balance": 0.0
                         })
-                    await userreceivehook.userrecive({ address: userReceiveAddress });
                     return res
                         .status(200)
                         .json({
@@ -789,6 +797,12 @@ class UsersController extends AppController {
     */
     async sendTest(req, res) {
         try {
+            // return res
+            //     .status(500)
+            //     .json({
+            //         "status": 500,
+            //         "message": "Insufficient Funds"
+            //     })
             let req_body = req.body;
 
             console.log("req_body", req_body)
@@ -1203,6 +1217,16 @@ class UsersController extends AppController {
             return Helper.jsonFormat(res, constants.SUCCESS_CODE, "Key has been decrypted successfully", decryptedHex);
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    async getPendingTransactionDetails(req, res) {
+        try {
+
+            var getDetails = await web3.eth.getTransaction('0xf73a6a9323d4b0ef166ea73c211d9499c29f72e414e837a11dc9c8c51afb91f8')
+                .then(console.log);
+        } catch (error) {
+            console.log("error", error)
         }
     }
 }

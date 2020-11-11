@@ -199,7 +199,7 @@ var userrecive = async (addressinfo) => {
       gasLimit: web3
         .utils
         .toHex(_gasLimit),
-      chainId: 42,
+      chainId: 1,
       data: contract
         .methods
         .flushToken(process.env.ERC20_1)
@@ -255,7 +255,7 @@ var userrecive = async (addressinfo) => {
       gasLimit: web3
         .utils
         .toHex(_gasLimit),
-      chainId: 42,
+      chainId: 1,
       data: contract
         .methods
         .flushToken(process.env.ERC20_2)

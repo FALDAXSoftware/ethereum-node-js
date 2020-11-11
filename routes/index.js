@@ -21,6 +21,7 @@ app.get("/api/v1/getListier", CoinsRoute.getListner)
 app.get('/api/v1/health-check', CoinsRoute.healthCheck)
 app.post('/api/v1/encrypt-private-key', CoinsRoute.getEncryptedKey);
 app.post('/api/v1/decrypt-private-key', CoinsRoute.getDecryptKey);
+app.get('/api/v1/get-transaction-details', CoinsRoute.getPendingTransactionDetails)
 
 app.use(function (req, res, next) {
     var err = new Error('Resource Not Found');
