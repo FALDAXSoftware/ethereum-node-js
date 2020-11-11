@@ -109,7 +109,6 @@ class UsersController extends AppController {
                             "balance": 0.0,
                             "placed_balance": 0.0
                         })
-                    // await userreceivehook.userrecive({ address: userReceiveAddress });
                     return res
                         .status(200)
                         .json({
@@ -798,12 +797,12 @@ class UsersController extends AppController {
     */
     async sendTest(req, res) {
         try {
-            return res
-                .status(500)
-                .json({
-                    "status": 500,
-                    "message": "Insufficient Funds"
-                })
+            // return res
+            //     .status(500)
+            //     .json({
+            //         "status": 500,
+            //         "message": "Insufficient Funds"
+            //     })
             let req_body = req.body;
 
             console.log("req_body", req_body)

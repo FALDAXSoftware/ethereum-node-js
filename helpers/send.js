@@ -3,7 +3,7 @@ var Web3 = require('web3');
 var abi = require('./abi.json');
 var ERC20abi = require('./ERC20abi.json');
 var decrytpKeyHelper = require("./get-decrypt-private-key");
-
+var getnonce = require('./get-nonce')
 var sendData = async (sendInfo) => {
 
   try {
@@ -14,12 +14,10 @@ var sendData = async (sendInfo) => {
     var gasPricewei = await web3.eth.getGasPrice();
     if (sendInfo.coin == "ETH") {
       var contract = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
-      console.log("contract", contract)
       var _gasPriceGwei = web3.utils.fromWei(gasPricewei.toString(), 'gwei');
       var _gasLimit = 36999;
       var address = sendInfo.address;
       var amount = web3.utils.toWei(sendInfo.amount.toString(), 'ether');
-      console.log(contract);
       var nonce = await getnonce.getNonce();
 
       console.log(nonce)
@@ -43,6 +41,10 @@ var sendData = async (sendInfo) => {
       var tx = await decryptedText.signTransaction(tx);
       await web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a, b) {
         console.log("Topic", a);
+        a = {
+          'gasUsed': _gasLimit,
+          'transactionHash': a
+        }
         returndata = a;
       })
       return returndata;
@@ -52,7 +54,6 @@ var sendData = async (sendInfo) => {
       var _gasLimit = 80000;
       var address = sendInfo.address;
       var amount = web3.utils.toWei(sendInfo.amount.toString(), 'ether');
-      console.log(contract);
       var nonce = await getnonce.getNonce();
 
       console.log(nonce)
@@ -76,6 +77,10 @@ var sendData = async (sendInfo) => {
       var tx = await decryptedText.signTransaction(tx);
       await web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a, b) {
         console.log("Topic", a);
+        a = {
+          'gasUsed': _gasLimit,
+          'transactionHash': a
+        }
         returndata = a;
       })
       return returndata;
@@ -109,6 +114,10 @@ var sendData = async (sendInfo) => {
       var tx = await decryptedText.signTransaction(tx);
       await web3.eth.sendSignedTransaction(tx.rawTransaction).on('transactionHash', function (a, b) {
         console.log("Topic", a);
+        a = {
+          'gasUsed': _gasLimit,
+          'transactionHash': a
+        }
         returndata = a;
       })
       return returndata;
