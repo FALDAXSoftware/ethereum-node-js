@@ -67,7 +67,7 @@ var addressData = async () => {
           .select()
           .where("deleted_at", null)
           .andWhere("coin_id", coinData.id)
-          .andWhere("receive_address", null)
+          .andWhere("receive_address", "")
 
         if (walletData != undefined) {
           var walletValue = await walletData
