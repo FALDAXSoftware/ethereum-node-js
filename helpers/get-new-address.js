@@ -63,12 +63,12 @@ var addressData = async () => {
 
       console.log("coinData", coinData)
 
-      await logger.info({
-        "module": "Get New Address Started",
-        "user_id": "user_" + user_id,
-        "url": "New Address Function",
-        "type": "Success"
-      }, coinData)
+      // await logger.info({
+      //   "module": "Get New Address Started",
+      //   "user_id": "user_" + user_id,
+      //   "url": "New Address Function",
+      //   "type": "Success"
+      // }, coinData)
 
       if (coinData != undefined) {
         var walletData = await WalletModel
@@ -79,12 +79,12 @@ var addressData = async () => {
           .andWhere("coin_id", coinData.id)
           .andWhere("receive_address", "")
 
-        await logger.info({
-          "module": "Get New Address Started",
-          "user_id": "user_" + user_id,
-          "url": "New Address Function",
-          "type": "Success"
-        }, walletData)
+        // await logger.info({
+        //   "module": "Get New Address Started",
+        //   "user_id": "user_" + user_id,
+        //   "url": "New Address Function",
+        //   "type": "Success"
+        // }, walletData)
 
 
         if (walletData != undefined) {
@@ -102,12 +102,12 @@ var addressData = async () => {
             .andWhere("is_active", true)
             .andWhere("id", walletData.user_id)
 
-          await logger.info({
-            "module": "Get New Address Started",
-            "user_id": "user_" + user_id,
-            "url": "New Address Function",
-            "type": "Success"
-          }, userData)
+          // await logger.info({
+          //   "module": "Get New Address Started",
+          //   "user_id": "user_" + user_id,
+          //   "url": "New Address Function",
+          //   "type": "Success"
+          // }, userData)
           if (userData != undefined) {
             await helperFunction.SendEmail("wallet_created_successfully", userData)
           }
