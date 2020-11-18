@@ -7,6 +7,7 @@ var UserModel = require("../models/v1/UsersModel");
 var CoinsModel = require("../models/v1/CoinsModel");
 var helperFunction = require("./helpers");
 var userreceivehook = require('./user-receive-hook');
+var logger = require("../controllers/v1/logger")
 
 var addressData = async () => {
 
@@ -60,6 +61,15 @@ var addressData = async () => {
         .andWhere("coin_code", process.env.COIN)
         .orderBy("id", "DESC");
 
+      console.log("coinData", coinData)
+
+      await logger.info({
+        "module": "Get New Address Started",
+        "user_id": "user_" + user_id,
+        "url": "New Address Function",
+        "type": "Success"
+      }, coinData)
+
       if (coinData != undefined) {
         var walletData = await WalletModel
           .query()
@@ -68,6 +78,14 @@ var addressData = async () => {
           .where("deleted_at", null)
           .andWhere("coin_id", coinData.id)
           .andWhere("receive_address", "")
+
+        await logger.info({
+          "module": "Get New Address Started",
+          "user_id": "user_" + user_id,
+          "url": "New Address Function",
+          "type": "Success"
+        }, walletData)
+
 
         if (walletData != undefined) {
           var walletValue = await walletData
@@ -83,6 +101,13 @@ var addressData = async () => {
             .where("deleted_at", null)
             .andWhere("is_active", true)
             .andWhere("id", walletData.user_id)
+
+          await logger.info({
+            "module": "Get New Address Started",
+            "user_id": "user_" + user_id,
+            "url": "New Address Function",
+            "type": "Success"
+          }, userData)
           if (userData != undefined) {
             await helperFunction.SendEmail("wallet_created_successfully", userData)
           }
