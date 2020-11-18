@@ -78,6 +78,7 @@ var addressData = async () => {
           await userreceivehook.userrecive({ address: address });
           var userData = await UserModel
             .query()
+            .first()
             .select()
             .where("deleted_at", null)
             .andWhere("is_active", true)
