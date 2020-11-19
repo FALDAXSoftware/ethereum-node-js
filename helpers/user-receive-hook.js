@@ -18,7 +18,12 @@ var UsersModel = require("../models/v1/UsersModel");
 
 var userSendNotification = async (data) => {
 
-  console.log("data", data)
+  await logger.info({
+    "module": "User Data Retrieved Started",
+    "user_id": "user_erthereum",
+    "url": "New Address Function",
+    "type": "Success"
+  }, "data" + JSON.stringify(data))
 
   var walletHistoryData = await WalletHistoryModel
     .query()
@@ -28,6 +33,13 @@ var userSendNotification = async (data) => {
     .andWhere("transaction_id", data.transaction_hash);
 
   console.log("walletHistoryData", walletHistoryData)
+
+  await logger.info({
+    "module": "User Data Retrieved Started",
+    "user_id": "user_erthereum",
+    "url": "New Address Function",
+    "type": "Success"
+  }, "walletHistoryData" + JSON.stringify(walletHistoryData))
 
   if (walletHistoryData == undefined) {
     var coinData = await CoinsModel
@@ -39,7 +51,12 @@ var userSendNotification = async (data) => {
       .andWhere("coin", data.coin)
       .orderBy("id", "DESC");
 
-    console.log("coinData", coinData)
+    await logger.info({
+      "module": "User Data Retrieved Started",
+      "user_id": "user_erthereum",
+      "url": "New Address Function",
+      "type": "Success"
+    }, "coinData" + JSON.stringify(coinData))
 
     if (coinData != undefined) {
       var walletData = await WalletModel
@@ -51,7 +68,12 @@ var userSendNotification = async (data) => {
         .andWhere("receive_address", data.destination_address)
         .orderBy("id", "DESC");
 
-      console.log("walletData", walletData)
+      await logger.info({
+        "module": "User Data Retrieved Started",
+        "user_id": "user_erthereum",
+        "url": "New Address Function",
+        "type": "Success"
+      }, "walletData" + JSON.stringify(walletData))
 
       if (walletData != undefined) {
         // var amount = 
@@ -68,7 +90,12 @@ var userSendNotification = async (data) => {
         }
 
 
-        console.log("walletHistory", walletHistory)
+        await logger.info({
+          "module": "User Data Retrieved Started",
+          "user_id": "user_erthereum",
+          "url": "New Address Function",
+          "type": "Success"
+        }, "walletHistory" + JSON.stringify(walletHistory))
         // Entry in wallet history
         await WalletHistoryModel
           .query()
@@ -364,7 +391,7 @@ var userrecive = async (addressinfo) => {
         "user_id": "user_erthereum",
         "url": "New Address Function",
         "type": "Success"
-      }, "tx after changes" + tx)
+      }, "tx after changes" + JSON.stringify(tx))
       // try {
       await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
         await logger.info({
@@ -372,8 +399,8 @@ var userrecive = async (addressinfo) => {
           "user_id": "user_erthereum",
           "url": "New Address Function",
           "type": "Success"
-        }, "b" + b)
-        console.log("Topic", a);
+        }, "b" + JSON.stringify(b))
+        console.log("Topic", JSON.stringify(a));
         await logger.info({
           "module": "User Data Retrieved Started",
           "user_id": "user_erthereum",
@@ -394,7 +421,7 @@ var userrecive = async (addressinfo) => {
           "user_id": "user_erthereum",
           "url": "New Address Function",
           "type": "Success"
-        }, "dataValue" + dataValue)
+        }, "dataValue" + JSON.stringify(dataValue))
         console.log("dataValue", dataValue);
         await module.exports.userSendNotification(dataValue)
       })
