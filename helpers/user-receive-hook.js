@@ -122,7 +122,12 @@ var userSendNotification = async (data) => {
           .andWhere("id", walletData.user_id)
           .orderBy("id", "DESC");
 
-        console.log("userData", userData)
+        await logger.info({
+          "module": "User Data Retrieved Started",
+          "user_id": "user_erthereum",
+          "url": "New Address Function",
+          "type": "Success"
+        }, userData)
 
         var userNotification = await UserNotificationModel
           .query()
@@ -133,7 +138,12 @@ var userSendNotification = async (data) => {
           .andWhere("slug", "receive")
           .orderBy("id", "DESC");
 
-        console.log(userNotification)
+        await logger.info({
+          "module": "User Data Retrieved Started",
+          "user_id": "user_erthereum",
+          "url": "New Address Function",
+          "type": "Success"
+        }, userNotification)
         // Pass Amount
         if (coinData != undefined) {
           userData.coinName = coinData.coin;
@@ -142,12 +152,23 @@ var userSendNotification = async (data) => {
         }
         userData.amountReceived = Number(parseFloat(data.amount).toFixed(8));
 
-        console.log("userData", userData)
+
+        await logger.info({
+          "module": "User Data Retrieved Started",
+          "user_id": "user_erthereum",
+          "url": "New Address Function",
+          "type": "Success"
+        }, userData)
 
         if (userNotification != undefined) {
           if (userNotification.email == true || userNotification.email == "true") {
             if (userData.email != undefined) {
-              console.log(userData);
+              await logger.info({
+                "module": "User Data Retrieved Started",
+                "user_id": "user_erthereum",
+                "url": "New Address Function",
+                "type": "Success"
+              }, "INSIDE IF " + userData)
               await Helper.SendEmail("receive", userData)
             }
           }
@@ -233,7 +254,7 @@ var userrecive = async (addressinfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 1,
+        chainId: process.env.CHAIN_ID,
         data: contract
           .methods
           .flushToken(process.env.ERC20_1)
@@ -321,7 +342,7 @@ var userrecive = async (addressinfo) => {
         gasLimit: web3
           .utils
           .toHex(_gasLimit),
-        chainId: 1,
+        chainId: process.env.CHAIN_ID,
         data: contract
           .methods
           .flushToken(process.env.ERC20_2)
@@ -344,6 +365,7 @@ var userrecive = async (addressinfo) => {
         "url": "New Address Function",
         "type": "Success"
       }, "tx after changes" + tx)
+      // try {
       await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
         await logger.info({
           "module": "User Data Retrieved Started",
@@ -376,7 +398,8 @@ var userrecive = async (addressinfo) => {
         console.log("dataValue", dataValue);
         await module.exports.userSendNotification(dataValue)
       })
-      return returndata;
+
+      // return returndata;
     });
     return true;
   } catch (error) {
