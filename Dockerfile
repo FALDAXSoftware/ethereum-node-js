@@ -1,4 +1,4 @@
-FROM 100.69.158.196/buildtool:pm291
+FROM keymetrics/pm2:12-jessie
 WORKDIR /usr/share/nginx/html/faldax-nodejs
 COPY package*.json ./
 RUN npm install
