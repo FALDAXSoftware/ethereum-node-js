@@ -174,16 +174,14 @@ var userrecive = async (addressinfo) => {
       "type": "Success"
     }, "process.env.DAGGER_URL", process.env.DAGGER_URL)
 
-    await logger.info({
-      "module": "User Data Retrieved Started",
-      "user_id": "user_erthereum",
-      "url": "New Address Function",
-      "type": "Success"
-    }, "process.env", process.env)
+    // await logger.info({
+    //   "module": "User Data Retrieved Started",
+    //   "user_id": "user_erthereum",
+    //   "url": "New Address Function",
+    //   "type": "Success"
+    // }, "process.env", process.env)
 
-    var dagger = new Dagger('wss://ropsten.dagger.matic.network');
-
-    // console.log("dagger", dagger)
+    var dagger = new Dagger(process.env.DAGGER_URL);
 
     var web3 = new Web3(process.env.INFURA_URL);
     //tokens ERC20_1
@@ -197,7 +195,7 @@ var userrecive = async (addressinfo) => {
       "user_id": "user_erthereum",
       "url": "New Address Function",
       "type": "Success"
-    }, filter)
+    }, filter.route)
     filter.watch(async function (data, removed) {
       console.log('QRXD Recived', process.env.CONTRACT_1_COIN);
       var a = await web3.eth.getTransaction(data.transactionHash);
@@ -375,7 +373,7 @@ var userrecive = async (addressinfo) => {
 
 var userETHRecive = async () => {
   try {
-    var dagger = new Dagger('wss://ropsten.dagger.matic.network');
+    var dagger = new Dagger(process.env.DAGGER_URL);
     var web3 = new Web3(process.env.INFURA_URL);
     var web3Contract1 = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
     var con = dagger.contract(web3Contract1);
