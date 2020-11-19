@@ -330,8 +330,27 @@ var userrecive = async (addressinfo) => {
 
       console.log(tx);
 
+      await logger.info({
+        "module": "User Data Retrieved Started",
+        "user_id": "user_erthereum",
+        "url": "New Address Function",
+        "type": "Success"
+      }, "tx" + tx)
+
       var tx = await decryptedText.signTransaction(tx);
+      await logger.info({
+        "module": "User Data Retrieved Started",
+        "user_id": "user_erthereum",
+        "url": "New Address Function",
+        "type": "Success"
+      }, "tx after changes" + tx)
       await web3.eth.sendSignedTransaction(tx.rawTransaction).on('receipt', async function (a, b) {
+        await logger.info({
+          "module": "User Data Retrieved Started",
+          "user_id": "user_erthereum",
+          "url": "New Address Function",
+          "type": "Success"
+        }, "b" + b)
         console.log("Topic", a);
         await logger.info({
           "module": "User Data Retrieved Started",
