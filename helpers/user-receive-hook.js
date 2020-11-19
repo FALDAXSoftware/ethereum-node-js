@@ -181,7 +181,7 @@ var userrecive = async (addressinfo) => {
       "type": "Success"
     }, "process.env", process.env)
 
-    var dagger = new Dagger("wss://kovan.dagger.matic.network");
+    var dagger = new Dagger('wss://kovan.dagger.matic.network');
 
     // console.log("dagger", dagger)
 
@@ -375,7 +375,7 @@ var userrecive = async (addressinfo) => {
 
 var userETHRecive = async () => {
   try {
-    var dagger = new Dagger("wss://kovan.dagger.matic.network");
+    var dagger = new Dagger('wss://kovan.dagger.matic.network');
     var web3 = new Web3(process.env.INFURA_URL);
     var web3Contract1 = new web3.eth.Contract(abi, process.env.CONTRACT_ADDRESS);
     var con = dagger.contract(web3Contract1);
