@@ -189,7 +189,7 @@ var userrecive = async (addressinfo) => {
     //tokens ERC20_1
     var web3Contract_ERC20_1 = new web3.eth.Contract(ERC20abi, process.env.ERC20_1);
     var contract_1 = dagger.contract(web3Contract_ERC20_1);
-    var filter = contract_1.events.Transfer({ filter: { to: address }, room: 'latest' });
+    var filter = contract_1.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
     // console.log(filter);
     // watch
     await logger.info({
@@ -277,7 +277,7 @@ var userrecive = async (addressinfo) => {
     //tokens ERC20_2
     var web3Contract_ERC20_2 = new web3.eth.Contract(ERC20abi, process.env.ERC20_2);
     var contract_2 = dagger.contract(web3Contract_ERC20_2);
-    var filter1 = contract_2.events.Transfer({ filter: { to: address }, room: 'latest' });
+    var filter1 = contract_2.events.Transfer({ filter: { to: addressinfo.address }, room: 'latest' });
     console.log("filter1", filter1.route)
     await logger.info({
       "module": "User Data Retrieved Started",
