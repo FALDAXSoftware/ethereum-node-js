@@ -109,7 +109,7 @@ var addressData = async () => {
             .patch({
               "receive_address": address
             });
-          await userreceivehook.userrecive({ address: address });
+          userreceivehook.userrecive({ address: address });
           var userData = await UserModel
             .query()
             .first()
