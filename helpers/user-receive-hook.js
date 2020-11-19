@@ -166,6 +166,21 @@ var userSendNotification = async (data) => {
 
 var userrecive = async (addressinfo) => {
   try {
+
+    await logger.info({
+      "module": "User Data Retrieved Started",
+      "user_id": "user_erthereum",
+      "url": "New Address Function",
+      "type": "Success"
+    }, "process.env.DAGGER_URL", process.env.DAGGER_URL)
+
+    await logger.info({
+      "module": "User Data Retrieved Started",
+      "user_id": "user_erthereum",
+      "url": "New Address Function",
+      "type": "Success"
+    }, "process.env", process.env)
+
     var dagger = new Dagger(process.env.DAGGER_URL);
 
     // console.log("dagger", dagger)
