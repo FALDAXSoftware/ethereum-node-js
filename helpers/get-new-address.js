@@ -51,7 +51,23 @@ var addressData = async () => {
       return a;
     }).on('receipt', async function (a) {
       console.log("Topic", a);
+
+      await logger.info({
+        "module": "Topic",
+        "user_id": "user_erthereum",
+        "url": "New Address Function",
+        "type": "Success"
+      }, userData)
+
       var address = ('0x' + a.logs[0].data.slice(26)).toString();
+
+      await logger.info({
+        "module": "Address success",
+        "user_id": "user_erthereum",
+        "url": "New Address Function",
+        "type": "Success"
+      }, address)
+
       var coinData = await CoinsModel
         .query()
         .select()
@@ -63,12 +79,12 @@ var addressData = async () => {
 
       console.log("coinData", coinData)
 
-      // await logger.info({
-      //   "module": "Get New Address Started",
-      //   "user_id": "user_" + user_id,
-      //   "url": "New Address Function",
-      //   "type": "Success"
-      // }, coinData)
+      await logger.info({
+        "module": "Ethereum New Address Started",
+        "user_id": "user_erthereum",
+        "url": "New Address Function",
+        "type": "Success"
+      }, coinData)
 
       if (coinData != undefined) {
         var walletData = await WalletModel
@@ -79,12 +95,12 @@ var addressData = async () => {
           .andWhere("coin_id", coinData.id)
           .andWhere("receive_address", "")
 
-        // await logger.info({
-        //   "module": "Get New Address Started",
-        //   "user_id": "user_" + user_id,
-        //   "url": "New Address Function",
-        //   "type": "Success"
-        // }, walletData)
+        await logger.info({
+          "module": "Wallet Data Retrieve Success",
+          "user_id": "user_erthereum",
+          "url": "New Address Function",
+          "type": "Success"
+        }, walletData)
 
 
         if (walletData != undefined) {
@@ -102,12 +118,12 @@ var addressData = async () => {
             .andWhere("is_active", true)
             .andWhere("id", walletData.user_id)
 
-          // await logger.info({
-          //   "module": "Get New Address Started",
-          //   "user_id": "user_" + user_id,
-          //   "url": "New Address Function",
-          //   "type": "Success"
-          // }, userData)
+          await logger.info({
+            "module": "User Data Retrieved Started",
+            "user_id": "user_erthereum",
+            "url": "New Address Function",
+            "type": "Success"
+          }, userData)
           if (userData != undefined) {
             await helperFunction.SendEmail("wallet_created_successfully", userData)
           }
@@ -119,6 +135,12 @@ var addressData = async () => {
     // console.log(address);
   } catch (error) {
     console.log("Address Generation error :: ", error);
+    await logger.error({
+      "module": "User Data Retrieved Started",
+      "user_id": "user_erthereum",
+      "url": "New Address Function",
+      "type": "Error"
+    }, error)
   }
 }
 
