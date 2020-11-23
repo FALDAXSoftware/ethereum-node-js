@@ -82,7 +82,7 @@ class UsersController extends AppController {
                 .orderBy('id', 'DESC')
 
             if (coinData != undefined) {
-                var walletData = undefined;
+                // var walletData = undefined;
                 var walletData = await WalletModel
                     .query()
                     .first()
